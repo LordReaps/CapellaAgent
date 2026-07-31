@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.ui.views">
+      <category
+            id="com.ai.bovenko.assistant.category"
+            name="AI Assistant">
+      </category>
+      <view
+            id="com.ai.bovenko.assistant.ChatView"
+            name="AI Chat Assistant"
+            category="com.ai.bovenko.assistant.category"
+            class="com.ai.bovenko.assistant.ChatView">
+      </view>
+   </extension>
+   
+   <extension point="org.eclipse.ui.commands">
+      <command
+            id="com.ai.bovenko.assistant.commands.openChat"
+            name="Open AI Assistant Chat"
+            description="Opens and focuses the AI Assistant Chat View">
+      </command>
+   </extension>
+
+   <extension point="org.eclipse.ui.handlers">
+      <handler
+            class="com.ai.bovenko.assistant.handlers.OpenChatHandler"
+            commandId="com.ai.bovenko.assistant.commands.openChat">
+      </handler>
+   </extension>
+
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="com.ai.bovenko.assistant.menus.mainMenu"
+               label="AI assistant">
+            <command
+                  commandId="com.ai.bovenko.assistant.commands.openChat"
+                  label="Open Chat"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   
+</plugin>
