@@ -1,153 +1,138 @@
 # CapellaAgent
 
-CapellaAgent is an Eclipse/Capella plugin prototype for integrating an LLM assistant into the MBSE workflow. The project adds a chat panel to the Capella environment, captures the currently selected model element as context, sends requests to a language model, and supports controlled model changes in the Operational Analysis layer.
+CapellaAgent — это прототип плагина для Eclipse/Capella, который интегрирует ИИ-ассистента в рабочий процесс MBSE. Проект добавляет чат-панель в среду Capella, извлекает контекст выбранного элемента модели, отправляет запрос в языковую модель и поддерживает контролируемые изменения в модели, в первую очередь в области Operational Analysis.
 
-The repository is designed as a proof of concept for AI-assisted engineering work in Capella, with emphasis on safe, reviewable edits rather than direct uncontrolled model mutation.
+Репозиторий разработан как proof of concept для AI-помощи в инженерной работе с моделями, с акцентом на безопасность и прозрачность изменений, а не на прямую и неконтролируемую модификацию модели.
 
-## Purpose
+## Назначение проекта
 
-The main goal of the project is to help engineers work with Capella models using natural-language requests, while keeping the model editing process traceable and explicit.
+Основная цель проекта — упростить работу инженера с моделями Capella через естественные запросы на языке, сохраняя при этом контроль над процессом редактирования модели.
 
-It includes:
+В проекте реализованы:
 
-- a Capella-side chat view integrated into the Eclipse UI;
-- context extraction from the selected EMF model element;
-- LLM interaction for analysis and tool invocation;
-- controlled write flow with preview and confirmation before applying changes;
-- model creation helpers for Operational Analysis elements such as operational activities and entities.
+- чат-панель внутри Capella;
+- извлечение контекста из выбранного элемента модели;
+- взаимодействие с LLM для анализа и вызова инструментов;
+- поток контролируемой записи изменений с предпросмотром и подтверждением;
+- вспомогательные методы для создания элементов Operational Analysis, таких как операции и сущности.
 
-## Key features
+## Основные возможности
 
-### 1. Capella UI integration
+### 1. Интеграция с интерфейсом Capella
 
-The plugin registers an Eclipse view and menu action that appear in the Capella workbench. The assistant panel listens to selected elements in the model and displays their metadata such as:
+Плагин регистрирует представление Eclipse и команду в рабочем пространстве Capella. Панель ассистента отслеживает выбранный элемент модели и отображает его метаданные, включая:
 
-- element ID;
-- element type;
-- element name.
+- ID элемента;
+- тип элемента;
+- имя элемента.
 
-### 2. Context-aware model interaction
+### 2. Контекстно-ориентированная работа с моделью
 
-Selected Capella objects are converted into structured model context and sent to the LLM together with the current user request. The project uses EMF reflection to work with Capella model elements without hard-coding specific model classes.
+Выбранные объекты Capella преобразуются в контекст, который передаётся в LLM вместе с пользовательским запросом. Проект использует EMF reflection для работы с элементами модели без жёсткой привязки к конкретным классам модели.
 
-### 3. LLM orchestration
+### 3. Оркестрация LLM
 
-The assistant uses a multi-step loop with:
+Ассистент работает по многошаговому циклу, включающему:
 
-- intent classification;
-- model context assembly;
-- LLM request generation;
-- tool execution when the model should be changed;
-- follow-up response handling.
+- классификацию намерения пользователя;
+- сбор контекста модели;
+- формирование запроса к LLM;
+- выполнение инструментов при необходимости изменения модели;
+- обработку последующего ответа.
 
-### 4. Controlled write / review flow
+### 4. Контролируемая запись изменений
 
-The system is designed to separate the proposal and execution of changes. Instead of modifying the Capella model immediately, it builds a change proposal, shows it in the UI, and waits for explicit confirmation before applying the change.
+В системе предусмотрен раздельный процесс предложения и применения изменений. Вместо немедленного редактирования модели формируется предложение по изменению, отображается в интерфейсе, и только после явного подтверждения выполняется модификация модели.
 
-This is especially important in engineering tools where model integrity and traceability matter.
+Это особенно важно в инженерных инструментах, где критичны корректность и отслеживаемость изменений.
 
-### 5. Capella model modification support
+### 5. Поддержка модификации модели Capella
 
-The code includes transaction-based modification routines for Capella elements, including:
+В коде присутствуют транзакционные методы изменения модели Capella, в том числе:
 
-- creation of operational activities;
-- creation of operational entities;
-- insertion into appropriate model containers;
-- use of EMF transactions to ensure safe updates.
+- создание OperationalActivity;
+- создание OperationalEntity;
+- вставка элемента в подходящий контейнер модели;
+- использование EMF transaction для безопасной записи.
 
-## Architecture
+## Архитектура
 
-The project follows a simple plugin-oriented architecture.
+Проект построен как плагин-ориентированная архитектура.
 
-### Main Java classes
+### Основные классы Java
 
-- `ChatView.java` — SWT UI panel for chat and selected context
-- `DialogController.java` — main orchestration logic for user messages and tool execution
-- `Router.java` — classification of user intent
-- `ContextBuilder.java` — builds LLM context from the selected model element
-- `CapellaModelAdapter.java` — EMF-based access to Capella objects and transactional creation logic
-- `ToolRegistry.java` — tool registration and execution
-- `GigaChatAdapter.java` — communication layer with the LLM backend
-- `LLMAdapter.java` — abstraction for model-provider communication
-- `ConfirmationManager.java` — handles approval or cancel flow for proposed changes
-- `ChangeSetManager.java` and `ChangeSet.java` — change tracking and review logic
-- `LocalToolEndpoint.java` — local endpoint used for tool invocation flow
-- `AuditLogger.java` — logging and trace support
-- `RichTextSanitizer.java` — sanitization of model descriptions before presenting them to the LLM
+- `ChatView.java` — SWT-панель чата и контекста выбранного элемента;
+- `DialogController.java` — основная логика обработки сообщений и вызова инструментов;
+- `Router.java` — классификация намерений пользователя;
+- `ContextBuilder.java` — сбор контекста для LLM;
+- `CapellaModelAdapter.java` — работа с EMF-объектами Capella и транзакционные операции изменения модели;
+- `ToolRegistry.java` — регистрация и запуск инструментов;
+- `GigaChatAdapter.java` — слой коммуникации с LLM;
+- `LLMAdapter.java` — абстракция для взаимодействия с провайдером модели;
+- `ConfirmationManager.java` — логика подтверждения или отмены предложенных изменений;
+- `ChangeSetManager.java` и `ChangeSet.java` — управление наборами изменений;
+- `LocalToolEndpoint.java` — локальная точка входа для работы инструментов;
+- `AuditLogger.java` — логирование и трассировка;
+- `RichTextSanitizer.java` — очистка текстов модели перед подачей их в LLM.
 
-### Eclipse plugin metadata
+### Метаданные плагина Eclipse
 
-- `plugin.xml` — registers the view, command, and menu contributions
-- `build.properties` — Eclipse PDE build configuration
-- `META-INF/` — plugin metadata
+- `plugin.xml` — регистрация представления, команды и меню;
+- `build.properties` — настройки сборки Eclipse PDE;
+- `META-INF/` — метаданные плагина.
 
-## Requirements
+## Требования
 
-To build and run this project, you need:
+Для сборки и запуска проекта необходимы:
 
 - Java 17+
-- Eclipse IDE for RCP and RAP Developers or an Eclipse environment compatible with Capella plugin development
-- Capella or a Capella-compatible target platform
-- EMF and Eclipse plugin dependencies available in the target platform
-- access to an LLM backend, such as GigaChat, configured in the application code
+- Eclipse IDE for RCP and RAP Developers или среда, совместимая с разработкой плагинов для Capella;
+- Capella или совместимая целевая платформа;
+- зависимости EMF и Eclipse, доступные в целевой платформе;
+- доступ к LLM-сервису, например GigaChat, настроенный в коде проекта.
 
-## Build and run
+## Сборка и запуск
 
-This project is not a standalone Java application. It is an Eclipse plugin for the Capella environment.
+Этот проект не является отдельным standalone Java-приложением. Он представляет собой Eclipse-плагин для среды Capella.
 
-### Typical workflow
+### Типичный сценарий запуска
 
-1. Open Eclipse with the required Capella tooling installed.
-2. Import the project as an Eclipse plugin project.
-3. Make sure the target platform includes Capella dependencies.
-4. Build the project with the Eclipse PDE workflow.
-5. Launch a runtime Eclipse instance with Capella.
-6. Open the assistant panel from the Capella UI.
+1. Открыть Eclipse с установленным инструментарием Capella.
+2. Импортировать проект как проект Eclipse plugin.
+3. Убедиться, что в целевой платформе присутствуют все зависимости Capella.
+4. Собрать проект через Eclipse PDE.
+5. Запустить рантайм Eclipse с Capella.
+6. Открыть панель ассистента из интерфейса Capella.
 
-## Usage
+## Использование
 
-Once the plugin is running inside Capella:
+После запуска плагина внутри Capella:
 
-1. Select a model element in the Capella project tree or diagram.
-2. Open the AI Assistant view.
-3. Enter a natural-language request.
-4. The assistant reads the context and proposes an answer or a model change.
-5. Review the generated proposal.
-6. Apply or cancel the change explicitly.
+1. Выбрать элемент модели в дереве проекта или на диаграмме.
+2. Открыть панель AI Assistant.
+3. Ввести естественный запрос.
+4. Ассистент прочитает контекст и предложит ответ или изменение модели.
+5. Проверить предложенное изменение.
+6. Применить или отменить его явно.
 
-The workflow is intended to be safe and reviewable, especially for MBSE and model-driven engineering scenarios.
+Подход проекта ориентирован на безопасную и проверяемую работу с MBSE-моделями, особенно в задачах проектирования систем.
 
-## Notes
+## Примечания
 
-This repository is a research and prototype project. It is not a production-ready generic Capella AI product, and it is tightly coupled to the Capella/Eclipse environment and the specific workflows used in the Operational Analysis layer.
+Это исследовательский и прототипный проект. Он не является полностью готовым коммерческим продуктом и тесно завязан на среду Capella/Eclipse и на сценарии работы с областью Operational Analysis.
 
-The implementation focuses on:
+Основной фокус реализации:
 
-- fast prototyping;
-- integration with model tooling;
-- controlled model modification;
-- practical exploration of LLM-assisted engineering work.
+- быстрая разработка прототипа;
+- интеграция с инструментами моделирования;
+- контролируемое изменение моделей;
+- практическое исследование AI-помощи в инженерной деятельности.
 
-## Repository status
+## Статус репозитория
 
-This project is best understood as an experimental integration layer between:
+Проект лучше всего понимать как экспериментальный слой интеграции между:
 
-- Capella/EMF model editing;
-- the Eclipse RCP workbench;
-- an LLM API for reasoning and tool invocation.
-
-## License
-
-The project does not currently declare a license file. If this repository is intended for public reuse, it should be reviewed and a license should be added before redistribution.
-
-## Future work
-
-Potential follow-up work includes:
-
-- better validation of generated model operations;
-- broader support for more Capella element types;
-- safer prompt and tool schemas;
-- structured change sets and auditing;
-- integration with enterprise LLM and authentication flows;
-- model diff review before execution.
+- Capella/EMF-моделями;
+- рабочей средой Eclipse RCP;
+- LLM API для рассуждений и вызова инструментов.
 
